@@ -296,6 +296,68 @@ for i in 1...5 {
 }
 ```
 
+# String Interpolation
+
+In Swift, `\()` is used for **string interpolation** — a way to insert the value of a variable or the result of an expression directly into a string.
+
+---
+
+### 🔹 Syntax
+
+```swift
+"Some text \(expression) more text"
+```
+
+Whatever is inside the `\()` will be **evaluated** and **converted to a string**, then inserted into the surrounding string.
+
+---
+
+### ✅ Examples
+
+#### 1. **Inserting a Variable**
+```swift
+let name = "Alex"
+print("Hello, \(name)!")
+```
+**Output:**  
+```
+Hello, Alex!
+```
+
+#### 2. **Inserting an Expression**
+```swift
+let a = 5
+let b = 3
+print("The sum is \(a + b).")
+```
+**Output:**  
+```
+The sum is 8.
+```
+
+#### 3. **Calling a Function**
+```swift
+func greet() -> String {
+    return "Welcome!"
+}
+print("Message: \(greet())")
+```
+**Output:**  
+```
+Message: Welcome!
+```
+
+---
+
+### 🧠 Why Use `\()`?
+
+- It makes code **cleaner and more readable**.
+- It avoids the need for string concatenation like `"Hello, " + name + "!"`.
+- It works with **any type** that conforms to `CustomStringConvertible` (which most types do).
+
+---
+
+
 ---
 # Protocols
 In Swift, a **protocol** is a blueprint of methods, properties, and other requirements that suit a particular task or piece of functionality. Classes, structs, and enums can **adopt** and **conform** to protocols by implementing these requirements.
@@ -398,3 +460,321 @@ Now any type that conforms to `Greetable` but doesn’t implement `greet()` will
 ---
 
 
+
+
+
+
+
+# Structs and Classes
+In Swift, both **structs** and **classes** are used to create custom data types, but they have some important differences. Let’s break it down clearly:
+
+---
+
+## 🧱 Structs in Swift
+
+A **struct** is a **value type**, meaning each instance keeps a unique copy of its data.
+
+### ✅ Key Features:
+- Value type (copied when assigned or passed)
+- No inheritance
+- Can have properties, methods, initializers
+- Can conform to protocols
+- Safer for multithreading due to immutability
+
+### 🧪 Example:
+```swift
+struct Person {
+    var name: String
+    var age: Int
+
+    func greet() {
+        print("Hi, I'm \(name) and I'm \(age) years old.")
+    }
+}
+
+var person1 = Person(name: "Alice", age: 30)
+var person2 = person1
+person2.name = "Bob"
+
+print(person1.name) // Alice
+print(person2.name) // Bob
+```
+
+---
+
+## 🏛️ Classes in Swift
+
+A **class** is a **reference type**, meaning instances share the same data when assigned or passed.
+
+### ✅ Key Features:
+- Reference type (shared when assigned or passed)
+- Supports inheritance
+- Can have deinitializers
+- Can use identity operators (`===`, `!==`)
+- More flexible but requires careful memory management
+
+### 🧪 Example:
+```swift
+class Person {
+    var name: String
+    var age: Int
+
+    init(name: String, age: Int) {
+        self.name = name
+        self.age = age
+    }
+
+    func greet() {
+        print("Hi, I'm \(name) and I'm \(age) years old.")
+    }
+}
+
+var person1 = Person(name: "Alice", age: 30)
+var person2 = person1
+person2.name = "Bob"
+
+print(person1.name) // Bob
+print(person2.name) // Bob
+```
+
+---
+
+## 🔍 Struct vs Class: Comparison Table
+
+| Feature                  | Struct                        | Class                         |
+|--------------------------|-------------------------------|-------------------------------|
+| Type                     | Value type                    | Reference type                |
+| Inheritance              | ❌ Not supported               | ✅ Supported                  |
+| Memory behavior          | Copied on assignment          | Shared reference              |
+| Mutability               | Immutable unless `mutating`   | Mutable by default            |
+| Deinitializers           | ❌ Not available               | ✅ Available                  |
+| Identity comparison      | ❌ Not possible                | ✅ Using `===` and `!==`      |
+
+---
+
+## 🧠 When to Use What?
+
+- Use **structs** when:
+  - You want immutability by default
+  - You’re modeling simple data
+  - You don’t need inheritance
+
+- Use **classes** when:
+  - You need shared state
+  - You need inheritance or polymorphism
+  - You need reference semantics
+
+---
+
+# Why Views are Structs and not Classes
+Great question! SwiftUI views are implemented as **structs** instead of **classes** for several important reasons that align with SwiftUI’s design philosophy and performance goals.
+
+---
+
+## 🧱 1. **Value Semantics = Predictability**
+
+Structs in Swift are **value types**, which means:
+
+- When you assign a struct to a new variable or pass it to a function, it’s **copied**, not shared.
+- This makes SwiftUI views **immutable by default**, which leads to **predictable behavior** and fewer bugs from shared mutable state.
+
+In UI frameworks, predictability is crucial — you want to know exactly what a view will look like based on its current state.
+
+---
+
+## ⚡ 2. **Performance Optimization**
+
+Value types allow the Swift compiler to perform **aggressive optimizations** like:
+
+- **Copy-on-write**
+- **Inline storage**
+- **Avoiding heap allocations**
+
+This makes SwiftUI views **lightweight and fast**, which is essential for rendering complex UIs efficiently.
+
+---
+
+## 🔁 3. **Declarative UI Design**
+
+SwiftUI is **declarative**, meaning you describe *what* the UI should look like for a given state, not *how* to update it.
+
+Using structs supports this model because:
+
+- Views are **recreated** every time the state changes.
+- SwiftUI compares the new view tree to the old one and updates only what’s necessary.
+
+This is much easier and safer with **immutable structs** than with mutable classes.
+
+---
+
+## 🧼 4. **No Need for Inheritance**
+
+SwiftUI uses **protocols and composition** instead of inheritance. Structs can conform to protocols, and SwiftUI views conform to the `View` protocol.
+
+Since SwiftUI doesn’t rely on class inheritance, there’s no need for views to be classes.
+
+---
+
+## 🧠 Summary Table
+
+| Feature                     | Struct (SwiftUI View)         | Class                         |
+|-----------------------------|-------------------------------|-------------------------------|
+| Type                        | Value                         | Reference                     |
+| Memory behavior             | Copied                        | Shared                        |
+| Mutability                  | Immutable by default          | Mutable                       |
+| Performance                 | High (stack-allocated)        | Lower (heap-allocated)        |
+| Inheritance                 | ❌ Not supported               | ✅ Supported                  |
+| Ideal for SwiftUI?          | ✅ Yes                         | ❌ No                         |
+
+---
+
+
+# Struct and Classes On
+
+
+
+Let's explore how **passing values** works in Swift when you create instances of **structs** and **classes**, like this:
+
+```swift
+ProductViewModel(productName: "iPhone")
+```
+
+---
+
+### 🧱 1. **Structs and Classes in Swift**
+
+Both **structs** and **classes** are used to define custom data types, but they behave differently in terms of **value vs. reference semantics**.
+
+---
+
+### 🧩 2. **Passing Values to Structs**
+
+Structs in Swift automatically get a **memberwise initializer** if you don’t define one yourself:
+
+```swift
+struct Product {
+    var name: String
+    var price: Double
+}
+
+let product = Product(name: "iPhone", price: 999.99)
+```
+
+- This creates a **new copy** of the struct.
+- Structs are **value types**, meaning they are **copied** when passed around.
+
+---
+
+### 🧠 3. **Passing Values to Classes**
+
+Classes require you to define an initializer (`init`) if you want to pass values:
+
+```swift
+class ProductViewModel {
+    var productName: String
+
+    init(productName: String) {
+        self.productName = productName
+    }
+}
+
+let viewModel = ProductViewModel(productName: "iPhone")
+```
+
+- Classes are **reference types**, meaning they are **shared** when passed around.
+- If you modify `viewModel` in one place, the change is visible everywhere that reference is used.
+
+---
+
+### 🔍 4. **What Happens in `ProductViewModel(productName: "iPhone")`?**
+
+- Swift calls the `init(productName:)` initializer.
+- It creates a new instance of `ProductViewModel`.
+- The `productName` property is set to `"iPhone"`.
+
+---
+
+### 🔄 Struct vs Class Behavior Example
+
+```swift
+struct ProductStruct {
+    var name: String
+}
+
+class ProductClass {
+    var name: String
+    init(name: String) {
+        self.name = name
+    }
+}
+
+var struct1 = ProductStruct(name: "iPhone")
+var struct2 = struct1
+struct2.name = "MacBook"
+
+print(struct1.name) // iPhone
+print(struct2.name) // MacBook
+
+var class1 = ProductClass(name: "iPhone")
+var class2 = class1
+class2.name = "MacBook"
+
+print(class1.name) // MacBook
+print(class2.name) // MacBook
+```
+
+- Structs are **copied**.
+- Classes are **referenced**.
+
+---
+
+
+
+
+Here’s a complete **Swift Playground example** that demonstrates how values are passed to **structs** and **classes**, and how they behave differently:
+
+---
+
+### 🧪 Swift Playground Code
+
+```swift
+import Foundation
+
+// MARK: - Struct Example (Value Type)
+struct ProductStruct {
+    var name: String
+}
+
+var struct1 = ProductStruct(name: "iPhone")
+var struct2 = struct1  // This creates a copy
+struct2.name = "MacBook"
+
+print("Struct1 name: \(struct1.name)") // iPhone
+print("Struct2 name: \(struct2.name)") // MacBook
+
+
+// MARK: - Class Example (Reference Type)
+class ProductClass {
+    var name: String
+
+    init(name: String) {
+        self.name = name
+    }
+}
+
+var class1 = ProductClass(name: "iPhone")
+var class2 = class1  // This shares the same reference
+class2.name = "MacBook"
+
+print("Class1 name: \(class1.name)") // MacBook
+print("Class2 name: \(class2.name)") // MacBook
+```
+
+---
+
+### 🧠 What You’ll Learn from Running This
+
+- **Structs** are copied when assigned to a new variable or passed to a function.
+- **Classes** are referenced, so changes affect all references to the same instance.
+
+---
