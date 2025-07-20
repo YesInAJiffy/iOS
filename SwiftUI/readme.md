@@ -900,4 +900,434 @@ struct HomeView: View {
 
 ---
 
+# Revisit #Binding
+Here's a **real-world example** of using `@Binding` with navigation in a **multi-step onboarding flow** — a common pattern in apps like fitness trackers, finance apps, or productivity tools.
+
+---
+
+## 🧭 Scenario: Onboarding Flow with `@Binding` Navigation
+
+### 🧩 Goal:
+- Show a welcome screen.
+- Navigate to a user info screen.
+- Navigate to a confirmation screen.
+- Allow each screen to control navigation using `@Binding`.
+
+---
+
+## ✅ Step-by-Step Code
+
+### 🔹 1. `OnboardingFlow.swift` (Parent View)
+
+```swift
+import SwiftUI
+
+struct OnboardingFlow: View {
+    @State private var step: Int = 1
+
+    var body: some View {
+        NavigationStack {
+            VStack {
+                if step == 1 {
+                    WelcomeView(step: $step)
+                } else if step == 2 {
+                    UserInfoView(step: $step)
+                } else if step == 3 {
+                    ConfirmationView(step: $step)
+                }
+            }
+            .navigationTitle("Onboarding")
+        }
+    }
+}
+```
+
+---
+
+### 🔹 2. `WelcomeView.swift`
+
+```swift
+struct WelcomeView: View {
+    @Binding var step: Int
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("Welcome to the App!")
+                .font(.largeTitle)
+
+            Button("Next") {
+                step = 2
+            }
+        }
+    }
+}
+```
+
+---
+
+### 🔹 3. `UserInfoView.swift`
+
+```swift
+struct UserInfoView: View {
+    @Binding var step: Int
+    @State private var name: String = ""
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("Enter Your Name")
+            TextField("Name", text: $name)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+
+            Button("Next") {
+                step = 3
+            }
+        }
+        .padding()
+    }
+}
+```
+
+---
+
+### 🔹 4. `ConfirmationView.swift`
+
+```swift
+struct ConfirmationView: View {
+    @Binding var step: Int
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("You're all set!")
+                .font(.title)
+
+            Button("Start Using App") {
+                // Reset or navigate to main app
+                step = 1
+            }
+        }
+    }
+}
+```
+
+---
+
+## 🔍 Why This Is Useful
+
+- Each screen can **control the flow** without owning the navigation state.
+- The parent (`OnboardingFlow`) manages the current step.
+- This pattern is scalable and clean for **multi-step wizards**, **form flows**, or **tutorials**.
+
+---
+
+# Revisit @StateObject 
+
+A great real-world use case for `@StateObject` in SwiftUI is managing **shared, long-lived state** across multiple views — such as a **shopping cart** in an e-commerce app.
+
+---
+
+## 🛒 Real-World Example: Shopping Cart
+
+### 🧠 Why `@StateObject`?
+- You use `@StateObject` when a view **owns** the lifecycle of an observable object.
+- It ensures the object is **created once** and **retained** as the view updates.
+
+---
+
+## ✅ Step-by-Step Code
+
+### 🔹 1. `CartManager.swift` – ObservableObject
+
+```swift
+import Foundation
+
+class CartManager: ObservableObject {
+    @Published var items: [String] = []
+
+    func addItem(_ item: String) {
+        items.append(item)
+    }
+
+    func removeItem(at index: Int) {
+        items.remove(at: index)
+    }
+}
+```
+
+---
+
+### 🔹 2. `ProductListView.swift` – Uses `@StateObject`
+
+```swift
+import SwiftUI
+
+struct ProductListView: View {
+    @StateObject private var cart = CartManager()
+
+    var body: some View {
+        NavigationStack {
+            List {
+                ForEach(["Apples", "Bananas", "Oranges"], id: \.self) { product in
+                    HStack {
+                        Text(product)
+                        Spacer()
+                        Button("Add") {
+                            cart.addItem(product)
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Products")
+            .toolbar {
+                NavigationLink(destination: CartView(cart: cart)) {
+                    Text("Cart (\(cart.items.count))")
+                }
+            }
+        }
+    }
+}
+```
+
+---
+
+### 🔹 3. `CartView.swift` – Uses `@ObservedObject`
+
+```swift
+import SwiftUI
+
+struct CartView: View {
+    @ObservedObject var cart: CartManager
+
+    var body: some View {
+        List {
+            ForEach(cart.items.indices, id: \.self) { index in
+                Text(cart.items[index])
+            }
+            .onDelete { indexSet in
+                indexSet.forEach { cart.removeItem(at: $0) }
+            }
+        }
+        .navigationTitle("Your Cart")
+    }
+}
+```
+
+---
+
+## 🔍 Summary
+
+| View              | Property Wrapper     | Purpose                                      |
+|-------------------|----------------------|----------------------------------------------|
+| `ProductListView` | `@StateObject`       | Owns and creates the `CartManager` instance  |
+| `CartView`        | `@ObservedObject`    | Observes the shared instance passed in       |
+
+---
+
+# Revisit @ObservedObject
+
+A real-world example of `@ObservedObject` in SwiftUI could be a **shopping cart** in an e-commerce app. Here's a simple scenario to illustrate how it works:
+
+---
+
+### 🛒 Scenario: Shopping Cart in a SwiftUI App
+
+You have a `CartManager` class that keeps track of items in the cart. You want multiple views (like a product list and a cart summary) to update automatically when the cart changes.
+
+---
+
+### 1. Define the Observable Object
+
+```swift
+import SwiftUI
+import Combine
+
+class CartManager: ObservableObject {
+    @Published var items: [String] = []
+
+    func addItem(_ item: String) {
+        items.append(item)
+    }
+
+    func removeItem(_ item: String) {
+        items.removeAll { $0 == item }
+    }
+}
+```
+
+---
+
+### 2. Use `@ObservedObject` in a View
+
+```swift
+struct ProductView: View {
+    @ObservedObject var cartManager: CartManager
+
+    var body: some View {
+        VStack {
+            Button("Add Apple") {
+                cartManager.addItem("Apple")
+            }
+
+            Text("Items in cart: \(cartManager.items.count)")
+        }
+    }
+}
+```
+
+---
+
+### 3. Pass the Object from a Parent View
+
+```swift
+struct ContentView: View {
+    @StateObject private var cartManager = CartManager()
+
+    var body: some View {
+        NavigationView {
+            VStack {
+                ProductView(cartManager: cartManager)
+                CartSummaryView(cartManager: cartManager)
+            }
+        }
+    }
+}
+```
+
+---
+
+### 4. Cart Summary View
+
+```swift
+struct CartSummaryView: View {
+    @ObservedObject var cartManager: CartManager
+
+    var body: some View {
+        Text("Cart has \(cartManager.items.count) items.")
+    }
+}
+```
+
+---
+
+### ✅ Why Use `@ObservedObject`?
+
+- It allows views to **reactively update** when the data in the shared object changes.
+- It’s perfect for **shared state** across multiple views, like a cart, user settings, or a live data feed.
+
+
+# Revisit @EnvironmentObject
+A great real-world example of using `@EnvironmentObject` in SwiftUI is a **user authentication system** where the login state needs to be shared across many views in the app.
+
+---
+
+### 🔐 Scenario: User Authentication
+
+You have a `UserSession` class that tracks whether a user is logged in. You want multiple views (like a login screen, profile screen, and settings) to access and react to this shared state **without passing it manually** through every view.
+
+---
+
+### 1. Define the Shared Observable Object
+
+```swift
+import SwiftUI
+import Combine
+
+class UserSession: ObservableObject {
+    @Published var isLoggedIn: Bool = false
+    @Published var username: String = ""
+    
+    func logIn(username: String) {
+        self.username = username
+        self.isLoggedIn = true
+    }
+
+    func logOut() {
+        self.username = ""
+        self.isLoggedIn = false
+    }
+}
+```
+
+---
+
+### 2. Inject It into the Environment
+
+```swift
+@main
+struct MyApp: App {
+    @StateObject private var userSession = UserSession()
+
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .environmentObject(userSession)
+        }
+    }
+}
+```
+
+---
+
+### 3. Use `@EnvironmentObject` in Views
+
+#### ContentView
+
+```swift
+struct ContentView: View {
+    @EnvironmentObject var userSession: UserSession
+
+    var body: some View {
+        if userSession.isLoggedIn {
+            HomeView()
+        } else {
+            LoginView()
+        }
+    }
+}
+```
+
+#### LoginView
+
+```swift
+struct LoginView: View {
+    @EnvironmentObject var userSession: UserSession
+    @State private var username = ""
+
+    var body: some View {
+        VStack {
+            TextField("Username", text: $username)
+            Button("Log In") {
+                userSession.logIn(username: username)
+            }
+        }
+        .padding()
+    }
+}
+```
+
+#### HomeView
+
+```swift
+struct HomeView: View {
+    @EnvironmentObject var userSession: UserSession
+
+    var body: some View {
+        VStack {
+            Text("Welcome, \(userSession.username)!")
+            Button("Log Out") {
+                userSession.logOut()
+            }
+        }
+    }
+}
+```
+
+---
+
+### ✅ Why Use `@EnvironmentObject`?
+
+- It allows **deep view hierarchies** to access shared data **without prop-drilling**.
+- It’s ideal for **global app state** like user sessions, theme settings, or app-wide preferences.
+
+
 
