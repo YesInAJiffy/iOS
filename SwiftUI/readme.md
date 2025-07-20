@@ -240,4 +240,315 @@ struct ChildView: View {
 
 ---
 
+In **SwiftUI**, `@State` is a **property wrapper** used to declare **local, mutable state** inside a view. It allows SwiftUI to **track changes** to that value and **automatically update the UI** when the value changes.
 
+---
+
+## 🧠 What Does `@State` Do?
+
+- It **stores a value** that belongs to the view.
+- When the value changes, SwiftUI **re-renders** the view.
+- It’s used for **simple, view-local state**, like toggles, counters, or text input.
+
+---
+
+## 🧩 Example
+
+```swift
+struct CounterView: View {
+    @State private var count = 0
+
+    var body: some View {
+        VStack {
+            Text("Count: \(count)")
+            Button("Increment") {
+                count += 1
+            }
+        }
+    }
+}
+```
+
+### 🔍 What’s Happening:
+- `@State private var count = 0`: Declares a state variable.
+- When the button is tapped, `count` increases.
+- SwiftUI **detects the change** and **rebuilds the view** to show the new count.
+
+---
+
+## ✅ Key Characteristics of `@State`
+
+| Feature | Description |
+|--------|-------------|
+| **Local** | Only used within the view it’s declared in. |
+| **Private** | Typically marked `private` to prevent external access. |
+| **Persistent** | SwiftUI keeps the value even when the view is re-rendered. |
+| **Triggers UI updates** | Changing the value causes the view to refresh. |
+
+---
+
+## ⚠️ When *Not* to Use `@State`
+
+- When the state needs to be **shared** with other views → use `@Binding`, `@ObservedObject`, or `@EnvironmentObject`.
+- When the state is **complex or long-lived** → use `@StateObject` or `@ObservedObject`.
+
+---
+
+In **SwiftUI**, `@Binding` is a property wrapper used to **create a two-way connection** between a parent view’s state and a child view. It allows the child view to **read and write** to a value that is owned by the parent.
+
+---
+
+## 🔄 What Does `@Binding` Do?
+
+- It **binds** a variable in a child view to a `@State` variable in the parent.
+- When the child view **modifies** the value, the change is **reflected in the parent**.
+- It’s used for **shared, mutable state** between views.
+
+---
+
+## 🧩 Example
+
+### Parent View
+
+```swift
+struct ParentView: View {
+    @State private var isOn = false
+
+    var body: some View {
+        ToggleView(isOn: $isOn)
+    }
+}
+```
+
+### Child View
+
+```swift
+struct ToggleView: View {
+    @Binding var isOn: Bool
+
+    var body: some View {
+        Toggle("Enable Feature", isOn: $isOn)
+    }
+}
+```
+
+### 🔍 What’s Happening:
+- `ParentView` owns the `@State` variable `isOn`.
+- It passes a **binding** (`$isOn`) to `ToggleView`.
+- `ToggleView` uses `@Binding` to access and modify the value.
+- Changes in the toggle update the parent’s state.
+
+---
+
+## ✅ When to Use `@Binding`
+
+- When a **child view needs to modify** a value owned by its parent.
+- For **form inputs**, **toggles**, **sliders**, or any control that updates shared state.
+
+---
+
+## ⚠️ Key Notes
+
+| Feature | Description |
+|--------|-------------|
+| **Two-way binding** | Child can read and write the value. |
+| **No ownership** | The child does not own the data—it just accesses it. |
+| **Requires $ prefix** | Use `$` to pass a binding from a `@State` variable. |
+
+---
+
+
+In **SwiftUI**, `@StateObject` is a property wrapper used to **create and own an instance of a reference type** that conforms to the `ObservableObject` protocol. It’s designed for managing **complex, long-lived state** like view models or data controllers.
+
+---
+
+## 🧠 What Does `@StateObject` Do?
+
+- It **initializes and owns** an observable object.
+- SwiftUI **tracks changes** to any `@Published` properties inside the object.
+- When those properties change, SwiftUI **automatically re-renders** the view.
+
+---
+
+## 🧩 Example
+
+```swift
+class CounterModel: ObservableObject {
+    @Published var count = 0
+}
+
+struct CounterView: View {
+    @StateObject private var model = CounterModel()
+
+    var body: some View {
+        VStack {
+            Text("Count: \(model.count)")
+            Button("Increment") {
+                model.count += 1
+            }
+        }
+    }
+}
+```
+
+### 🔍 What’s Happening:
+- `CounterModel` is a class that conforms to `ObservableObject`.
+- `@Published` makes `count` observable.
+- `@StateObject` tells SwiftUI to **create and manage** the model’s lifecycle.
+- When `count` changes, the view updates.
+
+---
+
+## ✅ When to Use `@StateObject`
+
+- When the view **creates** the observable object.
+- When the view is the **owner** of the object’s lifecycle.
+- For **view models** in MVVM architecture.
+
+---
+
+## ⚠️ When *Not* to Use `@StateObject`
+
+- Don’t use it in child views that **receive** the object from a parent — use `@ObservedObject` instead.
+- Don’t use it for **simple, local state** — use `@State`.
+
+---
+
+## 🧾 Summary Table
+
+| Property Wrapper | Ownership | Use Case |
+|------------------|-----------|----------|
+| `@StateObject`   | View owns and creates the object | View model or controller |
+| `@ObservedObject`| View receives the object | Shared object from parent |
+| `@State`         | View owns a simple value | Local, simple state |
+
+---
+
+In **SwiftUI**, `@ObservedObject` is a property wrapper used to **observe an external reference type** (usually a view model or data controller) that conforms to the `ObservableObject` protocol. It allows a view to **respond to changes** in that object’s data.
+
+---
+
+## 🧠 What Does `@ObservedObject` Do?
+
+- It **subscribes** to an object that conforms to `ObservableObject`.
+- When any of the object’s `@Published` properties change, the view **automatically re-renders**.
+- The view **does not own** the object—it just observes it.
+
+---
+
+## 🧩 Example
+
+```swift
+class TimerModel: ObservableObject {
+    @Published var time = 0
+}
+
+struct TimerView: View {
+    @ObservedObject var model: TimerModel
+
+    var body: some View {
+        Text("Time: \(model.time)")
+    }
+}
+```
+
+### 🔍 What’s Happening:
+- `TimerModel` is a class with a `@Published` property.
+- `TimerView` observes it using `@ObservedObject`.
+- When `time` changes, `TimerView` updates automatically.
+
+---
+
+## ✅ When to Use `@ObservedObject`
+
+- When a view **receives** an observable object from a parent.
+- When you want to **react to changes** in shared data without owning it.
+
+---
+
+## ⚠️ When *Not* to Use `@ObservedObject`
+
+- Don’t use it to **create** the object—use `@StateObject` for that.
+- Don’t use it for **simple local state**—use `@State`.
+
+---
+
+## 🧾 Summary Table
+
+| Property Wrapper | Ownership | Use Case |
+|------------------|-----------|----------|
+| `@StateObject`   | View owns and creates the object | View model or controller |
+| `@ObservedObject`| View receives the object | Shared object from parent |
+| `@State`         | View owns a simple value | Local, simple state |
+
+---
+
+In **SwiftUI**, `@EnvironmentObject` is a property wrapper used to **inject shared data** into a view hierarchy from the environment. It allows you to **share state across many views** without explicitly passing it through every view initializer.
+
+---
+
+## 🌍 What is `@EnvironmentObject`?
+
+- It’s used for **global or app-wide state**.
+- The object must conform to `ObservableObject`.
+- Views that use it **automatically update** when the object’s `@Published` properties change.
+
+---
+
+## 🧩 Example
+
+### Shared Data Model
+
+```swift
+class UserSettings: ObservableObject {
+    @Published var username: String = "Guest"
+}
+```
+
+### Root View (Injecting the Object)
+
+```swift
+@main
+struct MyApp: App {
+    var settings = UserSettings()
+
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .environmentObject(settings)
+        }
+    }
+}
+```
+
+### Child View (Accessing the Object)
+
+```swift
+struct ContentView: View {
+    @EnvironmentObject var settings: UserSettings
+
+    var body: some View {
+        Text("Hello, \(settings.username)!")
+    }
+}
+```
+
+---
+
+## ✅ When to Use `@EnvironmentObject`
+
+- When you need to **share data across many views**.
+- When passing data manually would be **cumbersome**.
+- For **global settings**, **user preferences**, **authentication state**, etc.
+
+---
+
+## ⚠️ Important Notes
+
+| Feature | Description |
+|--------|-------------|
+| **Must be injected** | Use `.environmentObject()` in a parent view or `@main` app struct. |
+| **Crashes if missing** | If a view uses `@EnvironmentObject` but it’s not injected, the app will crash. |
+| **ObservableObject required** | The object must conform to `ObservableObject` and use `@Published` for properties. |
+
+---
