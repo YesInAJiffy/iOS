@@ -787,5 +787,117 @@ struct YourAppNameApp: App {
 - Loads `ContentView` into the main window.
 
 ---
+# Navigation
+Here’s a clear explanation of **navigation in SwiftUI** with code examples using the modern `NavigationStack` and `NavigationLink`.
+
+---
+
+## 🧭 Basic Navigation with `NavigationStack`
+
+### ✅ Code Example:
+
+```swift
+import SwiftUI
+
+struct HomeView: View {
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                Text("Welcome to the Home View")
+                    .font(.title)
+
+                NavigationLink("Go to Detail View") {
+                    DetailView()
+                }
+            }
+            .navigationTitle("Home")
+        }
+    }
+}
+
+struct DetailView: View {
+    var body: some View {
+        Text("This is the Detail View")
+            .font(.title2)
+            .navigationTitle("Detail")
+    }
+}
+```
+
+### 🔍 Explanation:
+- `NavigationStack`: Manages a stack of views.
+- `NavigationLink`: Creates a tappable link to navigate to another view.
+- `.navigationTitle`: Sets the title in the navigation bar.
+
+---
+
+## 🧠 Navigation with Data Passing
+
+You can pass data to the destination view using `NavigationLink`.
+
+### ✅ Code Example:
+
+```swift
+struct HomeView: View {
+    var body: some View {
+        NavigationStack {
+            NavigationLink("Show Joke", value: "Why don't scientists trust atoms? Because they make up everything!")
+                .navigationDestination(for: String.self) { joke in
+                    JokeDetailView(joke: joke)
+                }
+                .navigationTitle("Jokes")
+        }
+    }
+}
+
+struct JokeDetailView: View {
+    let joke: String
+
+    var body: some View {
+        Text(joke)
+            .padding()
+            .navigationTitle("Joke")
+    }
+}
+```
+
+### 🔍 Explanation:
+- `NavigationLink(value:)`: Triggers navigation with a value.
+- `navigationDestination(for:)`: Defines the destination view for a specific data type.
+
+---
+
+## 🔄 Programmatic Navigation with State
+
+You can control navigation using a `@State` variable.
+
+### ✅ Code Example:
+
+```swift
+struct HomeView: View {
+    @State private var isDetailActive = false
+
+    var body: some View {
+        NavigationStack {
+            VStack {
+                Button("Go to Detail") {
+                    isDetailActive = true
+                }
+
+                NavigationLink(destination: DetailView(), isActive: $isDetailActive) {
+                    EmptyView()
+                }
+            }
+            .navigationTitle("Home")
+        }
+    }
+}
+```
+
+### 🔍 Explanation:
+- `@State`: Tracks whether the navigation should occur.
+- `NavigationLink(isActive:)`: Binds navigation to a Boolean state.
+
+---
 
 
