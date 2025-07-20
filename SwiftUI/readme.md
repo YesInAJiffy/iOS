@@ -552,3 +552,240 @@ struct ContentView: View {
 | **ObservableObject required** | The object must conform to `ObservableObject` and use `@Published` for properties. |
 
 ---
+
+# MVVM
+
+The **MVVM (Model-View-ViewModel)** architecture is a design pattern commonly used in **SwiftUI** and other UI frameworks to separate concerns and improve code organization, testability, and scalability.
+
+---
+
+## 🧱 MVVM Components
+
+### 1. **Model**
+- Represents the **data** and **business logic**.
+- Usually plain Swift structs or classes.
+- Doesn’t know anything about the UI.
+
+```swift
+struct User {
+    var name: String
+    var age: Int
+}
+```
+
+---
+
+### 2. **View**
+- The **UI layer** that displays data.
+- Declares what the UI should look like.
+- Binds to the ViewModel for data and actions.
+
+```swift
+struct UserView: View {
+    @ObservedObject var viewModel: UserViewModel
+
+    var body: some View {
+        Text("Name: \(viewModel.user.name)")
+    }
+}
+```
+
+---
+
+### 3. **ViewModel**
+- Acts as a **bridge** between the View and the Model.
+- Holds the state and logic for the View.
+- Uses `@Published` to notify the View of changes.
+
+```swift
+class UserViewModel: ObservableObject {
+    @Published var user = User(name: "Alice", age: 30)
+
+    func updateName(to newName: String) {
+        user.name = newName
+    }
+}
+```
+
+---
+
+## 🔄 How MVVM Works in SwiftUI
+
+1. **Model** holds the data.
+2. **ViewModel** manages the data and exposes it to the View.
+3. **View** observes the ViewModel and updates automatically when data changes.
+
+---
+
+## ✅ Benefits of MVVM
+
+- **Separation of concerns**: UI, logic, and data are clearly separated.
+- **Testability**: ViewModels can be tested independently of the UI.
+- **Reusability**: Views and ViewModels can be reused across the app.
+- **Scalability**: Easier to manage as the app grows.
+
+---
+
+Here’s a complete **MVVM (Model-View-ViewModel)** implementation in **SwiftUI** using a **Joke API** with a **service layer**, along with detailed explanations for each component.
+
+---
+
+## 🧱 1. Model – `Joke.swift`
+
+```swift
+import Foundation
+
+struct Joke: Codable, Identifiable {
+    let id: String
+    let joke: String
+}
+```
+
+### ✅ Explanation:
+- `Codable`: Allows the model to be encoded/decoded from JSON.
+- `Identifiable`: Makes it easier to use in SwiftUI lists or views.
+- The API returns a joke with an `id` and `joke` string.
+
+---
+
+## 🌐 2. Service – `JokeService.swift`
+
+```swift
+import Foundation
+
+protocol JokeServiceProtocol {
+    func fetchJoke(completion: @escaping (Result<Joke, Error>) -> Void)
+}
+
+class JokeService: JokeServiceProtocol {
+    func fetchJoke(completion: @escaping (Result<Joke, Error>) -> Void) {
+        guard let url = URL(string: "https://icanhazdadjoke.com/") else {
+            completion(.failure(URLError(.badURL)))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+
+            guard let data = data else {
+                completion(.failure(URLError(.badServerResponse)))
+                return
+            }
+
+            do {
+                let joke = try JSONDecoder().decode(Joke.self, from: data)
+                completion(.success(joke))
+            } catch {
+                completion(.failure(error))
+            }
+        }.resume()
+    }
+}
+```
+
+### ✅ Explanation:
+- `JokeServiceProtocol`: Defines a contract for fetching jokes.
+- `JokeService`: Implements the protocol using `URLSession`.
+- Sets the `Accept` header to `"application/json"` to get a JSON response.
+- Uses a completion handler with `Result` to handle success/failure.
+
+---
+
+## 🧠 3. ViewModel – `JokeViewModel.swift`
+
+```swift
+import Foundation
+
+class JokeViewModel: ObservableObject {
+    @Published var jokeText: String = "Loading..."
+    private let service: JokeServiceProtocol
+
+    init(service: JokeServiceProtocol = JokeService()) {
+        self.service = service
+        fetchJoke()
+    }
+
+    func fetchJoke() {
+        service.fetchJoke { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let joke):
+                    self?.jokeText = joke.joke
+                case .failure:
+                    self?.jokeText = "Failed to load joke."
+                }
+            }
+        }
+    }
+}
+```
+
+### ✅ Explanation:
+- `ObservableObject`: Allows the view to observe changes.
+- `@Published`: Updates the UI when `jokeText` changes.
+- `fetchJoke()`: Calls the service and updates the UI on the main thread.
+
+---
+
+## 🖼️ 4. View – `ContentView.swift`
+
+```swift
+import SwiftUI
+
+struct ContentView: View {
+    @StateObject private var viewModel = JokeViewModel()
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Text(viewModel.jokeText)
+                .font(.title2)
+                .padding()
+
+            Button("Get Another Joke") {
+                viewModel.fetchJoke()
+            }
+            .padding()
+            .background(Color.blue)
+            .foregroundColor(.white)
+            .cornerRadius(10)
+        }
+        .padding()
+    }
+}
+```
+
+### ✅ Explanation:
+- `@StateObject`: Initializes and observes the `JokeViewModel`.
+- Displays the joke and a button to fetch a new one.
+- UI updates automatically when `jokeText` changes.
+
+---
+
+## 🚀 5. App Entry – `YourAppNameApp.swift`
+
+```swift
+import SwiftUI
+
+@main
+struct YourAppNameApp: App {
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+    }
+}
+```
+
+### ✅ Explanation:
+- Entry point of the app.
+- Loads `ContentView` into the main window.
+
+---
+
+
