@@ -134,7 +134,7 @@ struct ProfileView: View {
 
 struct ProfileImage: View {
     var body: some View {
-        Image("user")
+        Image(systemName: "figure.archery")
             .resizable()
             .frame(width: 100, height: 100)
             .clipShape(Circle())
