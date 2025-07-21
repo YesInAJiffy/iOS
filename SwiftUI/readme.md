@@ -391,6 +391,21 @@ struct CounterView: View {
 - `@StateObject` tells SwiftUI to **create and manage** the model’s lifecycle.
 - When `count` changes, the view updates.
 
+### NOTE ABOUT ObservableObject
+In **SwiftUI**, `ObservableObject` is a protocol used to create data models that can be observed by views. When an object that conforms to `ObservableObject` changes, any SwiftUI view that is observing it will automatically update to reflect those changes.
+
+### How It Works
+
+1. **Conform to `ObservableObject`**:
+   You create a class that conforms to the `ObservableObject` protocol.
+
+2. **Use `@Published`**:
+   Inside that class, you mark properties with the `@Published` attribute. This tells SwiftUI to watch for changes to those properties.
+
+3. **Use `@ObservedObject` or `@StateObject` in Views**:
+   In your SwiftUI views, you use `@ObservedObject` or `@StateObject` to subscribe to the object and update the UI when the data changes.
+
+
 ---
 
 ## ✅ When to Use `@StateObject`
