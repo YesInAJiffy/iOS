@@ -227,43 +227,10 @@ State flows **from parent to child** views. When a state value changes, SwiftUI 
 | `@ObservedObject`  | Passed from parent         | Parent owns it    | View observes external object |
 | `@EnvironmentObject` | Global/shared via environment | System owns it | App-wide shared data like user settings |
 
----
 
-## 🧠 Example Flow
-
-```swift
-class CounterModel: ObservableObject {
-    @Published var count = 0
-}
-
-struct ParentView: View {
-    @StateObject var model = CounterModel()
-
-    var body: some View {
-        ChildView(model: model)
-    }
-}
-
-struct ChildView: View {
-    @ObservedObject var model: CounterModel
-
-    var body: some View {
-        VStack {
-            Text("Count: \(model.count)")
-            Button("Increment") {
-                model.count += 1
-            }
-        }
-    }
-}
-```
-
-- `ParentView` owns the model using `@StateObject`.
-- `ChildView` observes it using `@ObservedObject`.
-- When `count` changes, both views update as needed.
 
 ---
-
+# 📌 @State
 In **SwiftUI**, `@State` is a **property wrapper** used to declare **local, mutable state** inside a view. It allows SwiftUI to **track changes** to that value and **automatically update the UI** when the value changes.
 
 ---
@@ -317,7 +284,7 @@ struct CounterView: View {
 - When the state is **complex or long-lived** → use `@StateObject` or `@ObservedObject`.
 
 ---
-
+# 📌 @Binding
 In **SwiftUI**, `@Binding` is a property wrapper used to **create a two-way connection** between a parent view’s state and a child view. It allows the child view to **read and write** to a value that is owned by the parent.
 
 ---
@@ -340,9 +307,12 @@ struct ParentView: View {
 
     var body: some View {
         ToggleView(isOn: $isOn)
+        Text("Enabled \(isOn ? "true" : "false")").bold()
     }
 }
 ```
+#### Note: 
+The $ prefix creates a binding to the @State property. A binding allows the child view (ToggleView) to read and write the value of isOn in the parent view.
 
 ### Child View
 
@@ -381,7 +351,7 @@ struct ToggleView: View {
 
 ---
 
-
+# 📌 @StateObject
 In **SwiftUI**, `@StateObject` is a property wrapper used to **create and own an instance of a reference type** that conforms to the `ObservableObject` protocol. It’s designed for managing **complex, long-lived state** like view models or data controllers.
 
 ---
@@ -448,6 +418,7 @@ struct CounterView: View {
 
 ---
 
+# 📌 @ObservedObject
 In **SwiftUI**, `@ObservedObject` is a property wrapper used to **observe an external reference type** (usually a view model or data controller) that conforms to the `ObservableObject` protocol. It allows a view to **respond to changes** in that object’s data.
 
 ---
@@ -507,6 +478,7 @@ struct TimerView: View {
 
 ---
 
+# 📌 @EnvironmentObject
 In **SwiftUI**, `@EnvironmentObject` is a property wrapper used to **inject shared data** into a view hierarchy from the environment. It allows you to **share state across many views** without explicitly passing it through every view initializer.
 
 ---
