@@ -1,3 +1,4 @@
+# 📌 SwiftUI
 **SwiftUI** is a modern framework developed by Apple for building user interfaces across all Apple platforms, including iOS, macOS, watchOS, and tvOS. It was introduced in 2019 as a more intuitive and declarative way to design apps compared to the older UIKit and AppKit frameworks.
 
 ### Key Features of SwiftUI:
@@ -22,7 +23,7 @@
 
 
 
-# View
+# 📌 View
 In **SwiftUI**, a **View** is a fundamental building block of your app’s user interface. Everything you see on the screen—buttons, text, images, lists, and even entire screens—is a **View**.
 
 ---
@@ -130,7 +131,7 @@ struct WelcomeView: View {
 
 
 
-# Composition
+# 📌 Composition
 
 In **SwiftUI**, **composition** refers to the practice of **building complex user interfaces by combining smaller, reusable views**. It’s a core concept in SwiftUI’s declarative design philosophy.
 
@@ -576,7 +577,7 @@ struct ContentView: View {
 
 ---
 
-# MVVM
+# 📌 MVVM
 
 The **MVVM (Model-View-ViewModel)** architecture is a design pattern commonly used in **SwiftUI** and other UI frameworks to separate concerns and improve code organization, testability, and scalability.
 
@@ -923,7 +924,7 @@ struct HomeView: View {
 
 ---
 
-# Revisit #Binding
+# 📌 Revisit #Binding
 Here's a **real-world example** of using `@Binding` with navigation in a **multi-step onboarding flow** — a common pattern in apps like fitness trackers, finance apps, or productivity tools.
 
 ---
@@ -1043,7 +1044,7 @@ struct ConfirmationView: View {
 
 ---
 
-# Revisit @StateObject 
+# 📌 Revisit @StateObject 
 
 A great real-world use case for `@StateObject` in SwiftUI is managing **shared, long-lived state** across multiple views — such as a **shopping cart** in an e-commerce app.
 
@@ -1146,7 +1147,7 @@ struct CartView: View {
 
 ---
 
-# Revisit @ObservedObject
+# 📌 Revisit @ObservedObject
 
 A real-world example of `@ObservedObject` in SwiftUI could be a **shopping cart** in an e-commerce app. Here's a simple scenario to illustrate how it works:
 
@@ -1238,7 +1239,7 @@ struct CartSummaryView: View {
 - It’s perfect for **shared state** across multiple views, like a cart, user settings, or a live data feed.
 
 
-# Revisit @EnvironmentObject
+# 📌 Revisit @EnvironmentObject
 A great real-world example of using `@EnvironmentObject` in SwiftUI is a **user authentication system** where the login state needs to be shared across many views in the app.
 
 ---
