@@ -876,6 +876,50 @@ struct JokeDetailView: View {
 - `NavigationLink(value:)`: Triggers navigation with a value.
 - `navigationDestination(for:)`: Defines the destination view for a specific data type.
 
+### ✅ Updated Code Example:
+
+```swift
+struct Joke: Hashable {
+    let setup: String
+    let punchline: String
+}
+
+struct HomeView3: View {
+    let jokes = [
+        Joke(setup: "Why don't scientists trust atoms?", punchline: "Because they make up everything!"),
+        Joke(setup: "Why did the scarecrow win an award?", punchline: "Because he was outstanding in his field!")
+    ]
+
+    var body: some View {
+        NavigationStack {
+            List(jokes, id: \.self) { joke in
+                NavigationLink(joke.setup, value: joke) // Pass the Joke object
+            }
+            .navigationDestination(for: Joke.self) { joke in
+                JokeDetailView(joke: joke) // Handle the Joke object in the destination
+            }
+            .navigationTitle("Jokes")
+        }
+    }
+}
+
+struct JokeDetailView: View {
+    let joke: Joke
+
+    var body: some View {
+        VStack {
+            Text(joke.setup)
+                .font(.headline)
+                .padding()
+            Text(joke.punchline)
+                .font(.subheadline)
+                .padding()
+        }
+        .navigationTitle("Joke")
+    }
+}
+```
+
 ---
 
 ## 🔄 Programmatic Navigation with State
